@@ -1,0 +1,9 @@
+TODO
+----
+
+ - Add other RDF stores? Suggestions? Help?
+ - Add disk size of indexes to the results directory
+ - Add the ability to run the test for a set of dataset sizes
+ - How to generate HTML pages as reports?
+ - ... 
+ 
