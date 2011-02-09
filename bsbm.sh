@@ -103,7 +103,7 @@ fi
 run_fuseki() {
     echo "Running Fuseki..."
     kill `ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`
-    java -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> $BSBM_ROOT_PATH/results/fuseki.log &
+    java -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> /dev/null & # $BSBM_ROOT_PATH/results/fuseki.log &
     sleep 4
     echo "done."
 }
@@ -116,7 +116,7 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki.txt" ]
         mkdir $BSBM_ROOT_PATH/results
     fi
     cd $BSBM_ROOT_PATH/bsbmtools
-    java -cp "lib/*" benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki.txt
+    java -cp "lib/*" benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -seed $BSBM_SEED http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki.txt
     kill `ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
@@ -129,7 +129,7 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-update
         mkdir $BSBM_ROOT_PATH/results
     fi
     cd $BSBM_ROOT_PATH/bsbmtools
-    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/explore/sparql.txt -u http://127.0.0.1:3030/bsbm/update -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-update.txt
+    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/explore/sparql.txt -seed $BSBM_SEED -u http://127.0.0.1:3030/bsbm/update -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-update.txt
     kill `ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
@@ -142,7 +142,7 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-bi.txt
         mkdir $BSBM_ROOT_PATH/results
     fi
     cd $BSBM_ROOT_PATH/bsbmtools
-    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/businessIntelligence/sparql.txt -u http://127.0.0.1:3030/bsbm/update -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-bi.txt
+    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/businessIntelligence/sparql.txt -seed $BSBM_SEED -u http://127.0.0.1:3030/bsbm/update -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:3030/bsbm/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-bi.txt
     kill `ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
@@ -157,7 +157,7 @@ run_joseki() {
     REPLACE=\"$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB\"
     sed "s/${SEARCH}/$(echo $REPLACE | sed -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" $JOSEKIROOT/joseki-config-tdb.ttl > $JOSEKIROOT/joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl
     cd $JOSEKIROOT
-    ./bin/rdfserver joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl &> /dev/null &
+    ./bin/rdfserver joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl &>> $BSBM_ROOT_PATH/results/joseki.log & # /dev/null &
     sleep 4
     echo "done."
 }
@@ -170,7 +170,7 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki.txt" ]
         mkdir $BSBM_ROOT_PATH/results
     fi
     cd $BSBM_ROOT_PATH/bsbmtools
-    java -cp "lib/*" benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT http://127.0.0.1:2020/sparql > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki.txt
+    java -cp "lib/*" benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -seed $BSBM_SEED http://127.0.0.1:2020/sparql > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki.txt
     kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
@@ -183,8 +183,20 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-update
         mkdir $BSBM_ROOT_PATH/results
     fi
     cd $BSBM_ROOT_PATH/bsbmtools
-    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/explore/sparql.txt -u http://127.0.0.1:2020/update/service -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:2020/sparql > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-update.txt
+    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/explore/sparql.txt -seed $BSBM_SEED -u http://127.0.0.1:2020/update/service -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:2020/sparql > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-update.txt
     kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
 
+
+if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-bi.txt" ] ; then
+    run_joseki
+    echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) with BI against Joseki..."
+    if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
+        mkdir $BSBM_ROOT_PATH/results
+    fi
+    cd $BSBM_ROOT_PATH/bsbmtools
+    java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf usecases/businessIntelligence/sparql.txt -seed $BSBM_SEED -u http://127.0.0.1:2020/update/service -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt http://127.0.0.1:2020/sparql > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-bi.txt
+    kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
+    echo "done."
+fi
