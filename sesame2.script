@@ -1,0 +1,10 @@
+connect http://127.0.0.1:8080/openrdf-sesame .
+drop bsbm-@@BSBM_SCALE_FACTOR@@ .
+yes
+create native .
+bsbm-@@BSBM_SCALE_FACTOR@@
+Berling SPARQL Benchmark @@BSBM_SCALE_FACTOR@@
+spoc,posc
+open bsbm-@@BSBM_SCALE_FACTOR@@ .
+load ./datasets/bsbm-dataset-@@BSBM_SCALE_FACTOR@@/dataset.nt .
+exit .

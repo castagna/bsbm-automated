@@ -1,9 +1,10 @@
 TODO
 ----
 
- - Add other RDF stores? Suggestions? Help?
+ - Add other RDF stores? Suggestions? Help? -> Sesame2, BigOWLIM, BigData
  - Add disk size of indexes to the results directory
  - Add the ability to run the test for a set of dataset sizes
  - How to generate HTML pages as reports?
- - ... 
- 
+ - -o option for results in XML format
+ - ...
+

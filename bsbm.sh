@@ -16,15 +16,26 @@
 # limitations under the License.
 ##
 
+ROOT_PATH=`pwd`
+
 BSBM_ROOT_PATH=/tmp/bsbm
-BSBM_SCALE_FACTOR=14092
+#BSBM_SCALE_FACTOR=14092
+BSBM_SCALE_FACTOR=4000
 BSBM_NUM_QUERY_MIXES=128
 BSBM_NUM_QUERY_WARM_UP=32
 BSBM_CONCURRENT_CLIENTS=4
 BSBM_SEED=1212123
 BSBM_QUERY_TIMEOUT=30000
 
-TDB_LOADER=tdbloader
+TDB_LOADER=tdbloader2
+
+
+free_os_caches() {
+    echo "Freeing OS caches..."
+    sync
+    sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
+    echo "done."
+}
 
 
 if [ ! -d "$BSBM_ROOT_PATH" ]; then
@@ -86,8 +97,39 @@ if [ ! -d "$BSBM_ROOT_PATH/fuseki" ]; then
 fi
 
 
+##
+#   Sesame2 + Tomcat
+##
+
+if [ ! -d "$BSBM_ROOT_PATH/apache-tomcat-7.0.8" ]; then
+    echo "Downloading Tomcat..."
+    cd $BSBM_ROOT_PATH
+    wget http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.8/bin/apache-tomcat-7.0.8.tar.gz
+    tar xvfz apache-tomcat-7.0.8.tar.gz
+    rm apache-tomcat-7.0.8.tar.gz
+    echo "done."
+fi
+
+
+if [ ! -d "$BSBM_ROOT_PATH/openrdf-sesame-2.3.2" ]; then
+    echo "Downloading Sesame2..."
+    cd $BSBM_ROOT_PATH
+    wget https://downloads.sourceforge.net/project/sesame/Sesame%202/2.3.2/openrdf-sesame-2.3.2-sdk.tar.gz
+    tar xvfz openrdf-sesame-2.3.2-sdk.tar.gz
+    rm openrdf-sesame-2.3.2-sdk.tar.gz
+    echo "done."
+
+    cp $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/war/*.war $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps 
+    cd $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps
+    jar xvf openrdf-sesame.war
+    jar xvf openrdf-workbench.war
+fi
+
+
+
 if [ ! -d "$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR" ]; then
     echo "Loading dataset in TDB..."
+    free_os_caches
     export TDBROOT=$BSBM_ROOT_PATH/tdb
     export PATH=$PATH:$BSBM_ROOT_PATH/tdb/bin2
     mkdir $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR
@@ -111,6 +153,7 @@ run_fuseki() {
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki.txt" ]; then
     run_fuseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) against Fuseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -124,6 +167,7 @@ fi
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-update.txt" ]; then
     run_fuseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) with update against Fuseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -137,6 +181,7 @@ fi
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-fuseki-bi.txt" ]; then
     run_fuseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) with BI against Fuseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -165,6 +210,7 @@ run_joseki() {
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki.txt" ] ; then
     run_joseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) against Joseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -178,6 +224,7 @@ fi
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-update.txt" ] ; then
     run_joseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) with update against Joseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -191,6 +238,7 @@ fi
 
 if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-bi.txt" ] ; then
     run_joseki
+    free_os_caches
     echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) with BI against Joseki..."
     if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
         mkdir $BSBM_ROOT_PATH/results
@@ -200,3 +248,41 @@ if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-joseki-bi.txt
     kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
     echo "done."
 fi
+
+
+run_sesame2() {
+    echo "Running Sesame2 with Tomcat..."
+    cd $BSBM_ROOT_PATH
+    kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
+    sleep 4
+    ./apache-tomcat-7.0.8/bin/startup.sh
+    sleep 6
+    echo "done."
+
+}
+
+
+if [ ! -d "$HOME/.aduna/openrdf-sesame/repositories/bsbm-$BSBM_SCALE_FACTOR" ] ; then
+    run_sesame2
+    echo "Loading data into Sesame2..."
+    cd $BSBM_ROOT_PATH
+    cp $ROOT_PATH/sesame2.script $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/
+    sed -i "s/@@BSBM_SCALE_FACTOR@@/$BSBM_SCALE_FACTOR/g" $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/sesame2.script
+    time ./openrdf-sesame-2.3.2/bin/console.sh < $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/sesame2.script &>> $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-sesame2-load.txt
+    echo "done."
+fi
+
+
+if [ ! -f "$BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-sesame2.txt" ] ; then
+##    run_sesame2
+    free_os_caches
+    echo "Running BSBM benchmark (scale factor is $BSBM_SCALE_FACTOR) against Sesame2 with Tomcat..."
+    if [ ! -d "$BSBM_ROOT_PATH/results" ]; then
+        mkdir $BSBM_ROOT_PATH/results
+    fi
+    cd $BSBM_ROOT_PATH/bsbmtools
+    java -cp "lib/*" benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -seed $BSBM_SEED http://127.0.0.1:8080/openrdf-workbench/repositories/bsbm-2000/query > $BSBM_ROOT_PATH/results/bsbm-results-$BSBM_SCALE_FACTOR-sesame2.txt
+    kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
+    echo "done."
+fi
+
