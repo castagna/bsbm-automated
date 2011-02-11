@@ -6,5 +6,8 @@ TODO
  - Add the ability to run the test for a set of dataset sizes
  - How to generate HTML pages as reports?
  - -o option for results in XML format
+ - Gzip dataset.nt?
+ - See: https://github.com/afs/BSBM-run/blob/master/settings.txt
+ - Add the ability to check out a specific tag or revision
  - ...
 

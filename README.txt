@@ -33,6 +33,11 @@ You might want to use tdbloader2 instead of tdbloader:
 I am not a bash "guru", I warned you! You can insult me or send me suggestion
 how to improve the script. Suggestions are more welcome than insults. ;-)
 
+See also:
+
+ - https://github.com/afs/BSBM-run
+ - https://github.com/afs/BSBM-Local
+
 
 Thanks
 ------
