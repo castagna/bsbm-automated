@@ -17,8 +17,8 @@
 ##
 
 
-SESAME2_SPARQL_QUERY_URL="http://127.0.0.1:8080/openrdf-workbench/repositories/bsbm-2000/query"
-SESAME2_SPARQL_UPDATE_URL="http://127.0.0.1:8080/openrdf-workbench/repositories/bsbm-2000/query" ## not used, since Sesame2 does not support SPARQL Update
+SESAME2_SPARQL_QUERY_URL="http://127.0.0.1:8080/openrdf-workbench/repositories"
+SESAME2_SPARQL_UPDATE_URL="http://127.0.0.1:8080/openrdf-workbench/repositories" ## not used, since Sesame2 does not support SPARQL Update
 
 
 setup_sesame2() {
@@ -63,11 +63,11 @@ setup_sesame2() {
 
 
 run_sesame2() {
-    echo "==== Starting Tomcat with Sesame2 ..."
+    echo "== Starting Tomcat with Sesame2 ..."
     cd $BSBM_ROOT_PATH
     ./apache-tomcat-7.0.8/bin/startup.sh
     sleep 6
-    echo "==== Done."
+    echo "== Done."
 }
 
 
@@ -88,17 +88,17 @@ load_sesame2() {
 
 
 shutdown_sesame2() {
-    echo "==== Shutting down Sesame2 ..."
+    echo "== Shutting down Sesame2 ..."
     kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
     sleep 4 # Tomcat takes some time to shutdown
-    echo "==== Done."
+    echo "== Done."
 }
 
 
 test_sesame2() {
     run_sesame2
     free_os_caches
-    run_bsbmtools "sesame2" $SESAME2_SPARQL_QUERY_URL $SESAME2_SPARQL_UPDATE_URL "explore"
+    run_bsbmtools "sesame2" $SESAME2_SPARQL_QUERY_URL/bsbm-$BSBM_SCALE_FACTOR/query $SESAME2_SPARQL_UPDATE_URL/bsbm-$BSBM_SCALE_FACTOR/query "explore"
     shutdown_sesame2
 }
 

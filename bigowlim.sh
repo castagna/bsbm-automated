@@ -17,6 +17,10 @@
 ##
 
 
+BIGOWLIM_SPARQL_QUERY_URL="http://127.0.0.1:8080/openrdf-workbench/repositories"
+BIGOWLIM_SPARQL_UPDATE_URL="http://127.0.0.1:8080/openrdf-workbench/repositories" ## not used, since Sesame2 does not support SPARQL Update
+
+
 SESAME2_HOME="$BSBM_ROOT_PATH/openrdf-sesame-2.3.2"
 TOMCAT_HOME="$BSBM_ROOT_PATH/apache-tomcat-7.0.8"
 
@@ -47,11 +51,11 @@ setup_bigowlim() {
 
 
 run_bigowlim() {
-    echo "==== Starting Tomcat with Sesame2 + BigOWLIM ..."
+    echo "== Starting Tomcat with Sesame2 + BigOWLIM ..."
     cd $BSBM_ROOT_PATH
     ./apache-tomcat-7.0.8/bin/startup.sh
     sleep 6
-    echo "==== Done."
+    echo "== Done."
 }
 
 
@@ -75,10 +79,16 @@ load_bigowlim() {
 
 
 shutdown_bigowlim() {
-    echo "==== Shutting down Sesame2 ..."
+    echo "== Shutting down Sesame2 ..."
     kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
     sleep 4 # Tomcat takes some time to shutdown
-    echo "==== Done."
+    echo "== Done."
 }
 
 
+test_bigowlim() {
+    run_bigowlim
+    free_os_caches
+    run_bsbmtools "bigowlim" $BIGOWLIM_SPARQL_QUERY_URL/bsbm-bigowlim-$BSBM_SCALE_FACTOR/query $BIGOWLIM_SPARQL_UPDATE_URL/bsbm-bigowlim-$BSBM_SCALE_FACTOR/query "explore"
+    shutdown_bigowlim
+}

@@ -38,7 +38,7 @@ setup_joseki() {
 
 
 run_joseki() {
-    echo "==== Starting Joseki ..."
+    echo "== Starting Joseki ..."
     export JOSEKIROOT=$BSBM_ROOT_PATH/Joseki-3.4.3
     export JOSEKIROOT=$BSBM_ROOT_PATH/Joseki-3.4.3
     SEARCH=\"TDB\"
@@ -48,15 +48,15 @@ run_joseki() {
     ./bin/rdfserver joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl &>> $BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-joseki-$1-$BSBM_CONCURRENT_CLIENTS.log &
 #    ./bin/rdfserver joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl &>> /dev/null &
     sleep 4
-    echo "==== Done."
+    echo "== Done."
 }
 
 
 shutdown_joseki() {
-    echo "==== Shutting down Joseki ..."
+    echo "== Shutting down Joseki ..."
     kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
     sleep 1
-    echo "==== Done."
+    echo "== Done."
 }
 
 
@@ -72,14 +72,14 @@ test_joseki() {
         echo "==== [skipped] Running BSBM: sut=Joseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=explore ..."
     fi
 
-    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-joseki-update-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
-        run_joseki "update"
-        free_os_caches
-        run_bsbmtools "joseki" $JOSEKI_SPARQL_QUERY_URL $JOSEKI_SPARQL_UPDATE_URL "update"
-        shutdown_joseki
-    else
-        echo "==== [skipped] Running BSBM: sut=Joseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=update ..."
-    fi
+#    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-joseki-update-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
+#        run_joseki "update"
+#        free_os_caches
+#        run_bsbmtools "joseki" $JOSEKI_SPARQL_QUERY_URL $JOSEKI_SPARQL_UPDATE_URL "update"
+#        shutdown_joseki
+#    else
+#        echo "==== [skipped] Running BSBM: sut=Joseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=update ..."
+#    fi
 
     if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-joseki-bi-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
         run_joseki "bi"

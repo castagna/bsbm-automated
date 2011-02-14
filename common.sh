@@ -27,7 +27,7 @@ fi
 
 
 free_os_caches() {
-    echo "==== Freeing OS caches..."
+    echo "== Freeing OS caches..."
     sync
     sudo bash -c "echo 3 > /proc/sys/vm/drop_caches"
     echo "== Done."

@@ -75,7 +75,9 @@ run_bsbmtools() {
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
         RESULT_FILENAME=$BSBM_SCALE_FACTOR-$SYSTEM_UNDER_TEST-$USE_CASE-$BSBM_CONCURRENT_CLIENTS
-        java -cp "lib/*" -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL > $BSBM_ROOT_PATH/results/$RESULT_FILENAME.txt
+        CMD="-Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
+        echo "== java -cp \"lib/*\" $CMD"
+        java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/$RESULT_FILENAME.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     fi
 }
