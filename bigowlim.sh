@@ -17,9 +17,10 @@
 ##
 
 
-BIGOWLIM_HOME="/opt/bigowlim"
+BIGOWLIM_HOME="/opt/bigowlim" # BigOWLIM is available under a commercial license. It is neither free nor open-source.
 SESAME2_HOME="$BSBM_ROOT_PATH/openrdf-sesame-2.3.2"
 TOMCAT_HOME="$BSBM_ROOT_PATH/apache-tomcat-7.0.8"
+
 
 setup_bigowlim() {
 
