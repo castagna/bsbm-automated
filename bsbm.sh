@@ -33,12 +33,15 @@ source tdb.sh
 source fuseki.sh
 source joseki.sh
 source sesame2.sh
+# source bigowlim.sh
 
 setup_bsbmtools
 setup_tdb
 setup_fuseki
 setup_joseki
 setup_sesame2
+# setup_bigowlim # work in progress...
+
 
 BSBM_SCALE_FACTOR_VALUES=( 1000 2000 )
 BSBM_CONCURRENT_CLIENTS_VALUES=( 1 2 ) 
