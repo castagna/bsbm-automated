@@ -2,12 +2,16 @@ TODO
 ----
 
  - Add other RDF stores? Suggestions? Help? -> Sesame2, BigOWLIM, BigData
+    - Sesame2 [done]
+    - BigOWLIM [work in progress]
+    - ...
  - Add disk size of indexes to the results directory
- - Add the ability to run the test for a set of dataset sizes
+ - Add the ability to run the test for a set of dataset sizes [done]
  - How to generate HTML pages as reports?
- - -o option for results in XML format
+ - -o option for results in XML format [done]
  - Gzip dataset.nt?
  - See: https://github.com/afs/BSBM-run/blob/master/settings.txt
- - Add the ability to check out a specific tag or revision
+ - Add the ability to checkout a specific tag or revision
+ - Add SDB with MySQL|PostgreSQL
  - ...
 
