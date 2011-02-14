@@ -17,8 +17,11 @@
 ##
 
 ROOT_PATH=`pwd`
-
 BSBM_ROOT_PATH=/tmp/bsbm
+
+# uncomment if you do not have BigOWLIM
+BIGOWLIM_HOME="/opt/bigowlim" # BigOWLIM is available under a commercial license. It is neither free nor open-source.
+
 #BSBM_SCALE_FACTOR=14092
 #BSBM_SCALE_FACTOR=4000
 #BSBM_CONCURRENT_CLIENTS=4
@@ -33,14 +36,18 @@ source tdb.sh
 source fuseki.sh
 source joseki.sh
 source sesame2.sh
-# source bigowlim.sh
+if [[ -n $BIGOWLIM_HOME ]] ; then
+    source bigowlim.sh
+fi
 
 setup_bsbmtools
 setup_tdb
 setup_fuseki
 setup_joseki
 setup_sesame2
-# setup_bigowlim # work in progress...
+if [[ -n $BIGOWLIM_HOME ]] ; then
+    setup_bigowlim
+fi
 
 
 BSBM_SCALE_FACTOR_VALUES=( 1000 2000 )
@@ -53,6 +60,9 @@ do
     generate_bsbmtools_dataset
     load_tdb
     load_sesame2
+    if [[ -n $BIGOWLIM_HOME ]] ; then
+        load_bigowlim
+    fi
 done
 shutdown_sesame2
 
@@ -62,6 +72,11 @@ do
     for BSBM_CONCURRENT_CLIENTS in ${BSBM_CONCURRENT_CLIENTS_VALUES[@]} 
     do
         test_fuseki
+        test_joseki
+        test_sesame2
+        if [[ -n $BIGOWLIM_HOME ]] ; then
+            test_bigowlim
+        fi
     done
 done
 

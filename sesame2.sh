@@ -41,11 +41,19 @@ setup_sesame2() {
         wget https://downloads.sourceforge.net/project/sesame/Sesame%202/2.3.2/openrdf-sesame-2.3.2-sdk.tar.gz
         tar xvfz openrdf-sesame-2.3.2-sdk.tar.gz
         rm openrdf-sesame-2.3.2-sdk.tar.gz
-        cp $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/war/*.war $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps 
+        # uncompressing openrdf-sesame.war
         cd $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps
+        mkdir openrdf-sesame
+        cp $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/war/openrdf-sesame.war $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps/openrdf-sesame/
+        cd $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps/openrdf-sesame/
         jar xvf openrdf-sesame.war
-        jar xvf openrdf-workbench.war
         rm openrdf-sesame.war
+        # uncompressing openrdf-workbench.war
+        cd $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps
+        mkdir openrdf-workbench
+        cp $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/war/openrdf-workbench.war $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps/openrdf-workbench/
+        cd $BSBM_ROOT_PATH/apache-tomcat-7.0.8/webapps/openrdf-workbench/
+        jar xvf openrdf-workbench.war
         rm openrdf-workbench.war
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     else

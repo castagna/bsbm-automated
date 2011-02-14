@@ -17,26 +17,68 @@
 ##
 
 
-BIGOWLIM_HOME="/opt/bigowlim" # BigOWLIM is available under a commercial license. It is neither free nor open-source.
 SESAME2_HOME="$BSBM_ROOT_PATH/openrdf-sesame-2.3.2"
 TOMCAT_HOME="$BSBM_ROOT_PATH/apache-tomcat-7.0.8"
 
 
 setup_bigowlim() {
-
-    if [ ! -d "$HOME/.aduna/openrdf-sesame-console/templates" ] ; then
-        mkdir $HOME/.aduna/openrdf-sesame-console/templates
-    fi
-
-    if [ ! -f "$HOME/.aduna/openrdf-sesame-console/templates/bigowlim.ttl" ] ; then
-        cp $BIGOWLIM_HOME/templates/bigowlim.ttl $HOME/.aduna/openrdf-sesame-console/templates/
-    fi
-
     if [ ! -f "$SESAME2_HOME/lib/owlim-big-3.4.jar" ] ; then
-        cp $BIGOWLIM_HOME/lib/owlim-big-3.4.jar $SESAME2_HOME/lib/
-        cp $BIGOWLIM_HOME/lib/owlim-big-3.4.jar $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/
-        cp $BIGOWLIM_HOME/lib/lucene-core-*.jar $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/
-        cp $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/logback-* $TOMCAT_HOME/webapps/openrdf-workbench/WEB-INF/lib/
-    fi 
+        echo "==== Setting up BigOWLIM ..."
+        echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
+        if [ ! -d "$HOME/.aduna/openrdf-sesame-console/templates" ] ; then
+            mkdir $HOME/.aduna/openrdf-sesame-console/templates
+        fi
 
+        if [ ! -f "$HOME/.aduna/openrdf-sesame-console/templates/bigowlim.ttl" ] ; then
+            cp $BIGOWLIM_HOME/templates/bigowlim.ttl $HOME/.aduna/openrdf-sesame-console/templates/
+        fi
+
+        if [ ! -f "$SESAME2_HOME/lib/owlim-big-3.4.jar" ] ; then
+            cp $BIGOWLIM_HOME/lib/owlim-big-3.4.jar $SESAME2_HOME/lib/
+            cp $BIGOWLIM_HOME/lib/owlim-big-3.4.jar $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/
+            cp $BIGOWLIM_HOME/ext/lucene-core-*.jar $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/
+            cp $TOMCAT_HOME/webapps/openrdf-sesame/WEB-INF/lib/logback-* $TOMCAT_HOME/webapps/openrdf-workbench/WEB-INF/lib/
+        fi 
+        echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
+    else 
+        echo "==== [skipped] Setting up BigOWLIM ..."
+    fi
 }
+
+
+run_bigowlim() {
+    echo "==== Starting Tomcat with Sesame2 + BigOWLIM ..."
+    cd $BSBM_ROOT_PATH
+    ./apache-tomcat-7.0.8/bin/startup.sh
+    sleep 6
+    echo "==== Done."
+}
+
+
+load_bigowlim() {
+    if [ ! -d "$HOME/.aduna/openrdf-sesame/repositories/bsbm-bigowlim-$BSBM_SCALE_FACTOR" ] ; then
+        echo "==== Loading data with BigOWLIM: scale=$BSBM_SCALE_FACTOR ..."
+        echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
+        cd $BSBM_ROOT_PATH
+        cp $ROOT_PATH/bigowlim.script $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/
+        sed -i "s/@@BSBM_SCALE_FACTOR@@/$BSBM_SCALE_FACTOR/g" $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/bigowlim.script
+        SEARCH="@@BIGOWLIM_HOME@@"
+        REPLACE=$BIGOWLIM_HOME
+        sed -i "s/${SEARCH}/$(echo $REPLACE | sed -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/bigowlim.script
+        time ./openrdf-sesame-2.3.2/bin/console.sh < $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/bigowlim.script &>> $BSBM_ROOT_PATH/results/bigowlim-$BSBM_SCALE_FACTOR-load.txt
+        rm $BSBM_ROOT_PATH/openrdf-sesame-2.3.2/bigowlim.script
+        echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
+    else
+        echo "==== [skipped] Loading data with BigOWLIM: scale=$BSBM_SCALE_FACTOR ..."
+    fi
+}
+
+
+shutdown_bigowlim() {
+    echo "==== Shutting down Sesame2 ..."
+    kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
+    sleep 4 # Tomcat takes some time to shutdown
+    echo "==== Done."
+}
+
+

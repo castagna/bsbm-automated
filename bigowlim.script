@@ -1,0 +1,15 @@
+connect http://127.0.0.1:8080/openrdf-sesame .
+drop bsbm-bigowlim-@@BSBM_SCALE_FACTOR@@ .
+yes
+create bigowlim .
+bsbm-bigowlim-@@BSBM_SCALE_FACTOR@@
+Berling SPARQL Benchmark @@BSBM_SCALE_FACTOR@@
+owl-max
+true
+bsbm-bigowlim-@@BSBM_SCALE_FACTOR@@-storage
+200000
+@@BIGOWLIM_HOME@@/getting-started/ontology/owl.rdfs
+http://www.w3.org/2002/07/owl#
+open bsbm-bigowlim-@@BSBM_SCALE_FACTOR@@ .
+load ./datasets/bsbm-dataset-@@BSBM_SCALE_FACTOR@@/dataset.nt .
+exit .
