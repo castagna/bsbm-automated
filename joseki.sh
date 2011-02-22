@@ -53,11 +53,18 @@ run_joseki() {
 
 
 shutdown_joseki() {
-    echo "== Shutting down Joseki ..."
-    kill `ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`
-    sleep 1
-    echo "== Done."
+    PID="`ps -ef | grep Joseki | grep -v grep | awk '{print $2}'`"
+    if [[ -n $PID ]] ; then
+        echo "== Shutting down Joseki ..."
+        kill $PID
+        sleep 1
+        echo "== Done."
+    else
+        echo "== [skipped] Shutting down Joseki ..."
+    fi
 }
+
+
 
 
 test_joseki() {

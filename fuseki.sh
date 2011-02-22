@@ -46,10 +46,15 @@ run_fuseki() {
 
 
 shutdown_fuseki() {
-    echo "== Shutting down Fuseki ..."
-    kill `ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`
-    sleep 1
-    echo "== Done."
+    PID="`ps -ef | grep fuseki | grep -v grep | awk '{print $2}'`"
+    if [[ -n $PID ]] ; then
+        echo "== Shutting down Fuseki ..."
+        kill $PID
+        sleep 1
+        echo "== Done."
+    else
+        echo "== [skipped] Shutting down Fuseki ..."
+    fi
 }
 
 

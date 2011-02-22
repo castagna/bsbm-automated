@@ -88,10 +88,15 @@ load_sesame2() {
 
 
 shutdown_sesame2() {
-    echo "== Shutting down Sesame2 ..."
-    kill `ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`
-    sleep 4 # Tomcat takes some time to shutdown
-    echo "== Done."
+    PID="`ps -ef | grep tomcat | grep -v grep | awk '{print $2}'`"
+    if [[ -n $PID ]] ; then
+        echo "== Shutting down Sesame2 ..."
+        kill $PID
+        sleep 1
+        echo "== Done."
+    else
+        echo "== [skipped] Shutting down Sesame2 ..."
+    fi
 }
 
 
