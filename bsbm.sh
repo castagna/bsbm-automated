@@ -82,22 +82,4 @@ do
 done
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$ROOT_PATH/report.py $BSBM_ROOT_PATH/results
