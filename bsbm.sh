@@ -31,8 +31,8 @@ BSBM_SEED=1212123
 BSBM_QUERY_TIMEOUT=60000
 
 source common.sh
-source tdb.sh # TDB must be before BSBM Tools (since we patch it to run local TDB tests)
 source bsbmtools.sh
+source tdb.sh
 source fuseki.sh
 source joseki.sh
 source sesame2.sh
@@ -40,8 +40,8 @@ if [[ -n $BIGOWLIM_HOME ]] ; then
     source bigowlim.sh
 fi
 
+setup_tdb # TDB must be before BSBM Tools (since we patch it to run local TDB tests)
 setup_bsbmtools
-setup_tdb
 setup_fuseki
 #setup_joseki
 #setup_sesame2
