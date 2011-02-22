@@ -32,6 +32,8 @@ load_tdb() {
         fi
         $TDB_LOADER -v --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset.nt > $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-tdbload.txt
         tdbstats --loc $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB > $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB/stats.opt
+        ls -la $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB > $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-size.txt
+        du -sh $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB >> $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-size.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     else
         echo "==== [skipped] Loading data in TDB: scale=$BSBM_SCALE_FACTOR ..."

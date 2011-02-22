@@ -68,7 +68,7 @@ generate_bsbmtools_dataset() {
         echo "==== Generating dataset: scale=$BSBM_SCALE_FACTOR ..."
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
-        CMD="-Xmx1024M -server benchmark.generator.Generator -fc -ud -pc $BSBM_SCALE_FACTOR -s nt"
+        CMD="-server -Xmx1024M benchmark.generator.Generator -fc -ud -pc $BSBM_SCALE_FACTOR -s nt"
         echo "== java -cp \"lib/*\" $CMD"
         java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/bsbmtools-generator-$BSBM_SCALE_FACTOR.txt
         if [ ! -d "$BSBM_ROOT_PATH/datasets" ]; then
@@ -109,7 +109,7 @@ run_bsbmtools_rampup() {
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
         RESULT_FILENAME=$BSBM_SCALE_FACTOR-$SYSTEM_UNDER_TEST-$USE_CASE-$BSBM_CONCURRENT_CLIENTS-rampup
-        CMD="-Xmx256M benchmark.testdriver.TestDriver -rampup -runs 8000 -seed 1212123 -idir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/td_data -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
+        CMD="-server -Xmx256M benchmark.testdriver.TestDriver -rampup -runs 8000 -seed 1212123 -idir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/td_data -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
         echo "== java -cp \"lib/*\" $CMD"
         java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/$RESULT_FILENAME.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
@@ -142,7 +142,7 @@ run_bsbmtools() {
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
         RESULT_FILENAME=$BSBM_SCALE_FACTOR-$SYSTEM_UNDER_TEST-$USE_CASE-$BSBM_CONCURRENT_CLIENTS
-        CMD="-Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -idir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/td_data -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
+        CMD="-server -Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -idir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/td_data -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
         echo "== java -cp \"lib/*\" $CMD"
         java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/$RESULT_FILENAME.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
@@ -202,8 +202,8 @@ setup_fuseki() {
 
 run_fuseki() {
     echo "== Starting Fuseki ..."
-#    java -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> /dev/null &
-    java -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> $BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-$1-$BSBM_CONCURRENT_CLIENTS.log &
+#    java -server -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> /dev/null &
+    java -server -jar $BSBM_ROOT_PATH/fuseki/target/fuseki-0.2.0-SNAPSHOT-sys.jar --update --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB /bsbm &>> $BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-$1-$BSBM_CONCURRENT_CLIENTS.log &
     sleep 4
     echo "== Done."
 }
