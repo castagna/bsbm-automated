@@ -31,8 +31,8 @@ BSBM_SEED=1212123
 BSBM_QUERY_TIMEOUT=60000
 
 source common.sh
+source tdb.sh # TDB must be before BSBM Tools (since we patch it to run local TDB tests)
 source bsbmtools.sh
-source tdb.sh
 source fuseki.sh
 source joseki.sh
 source sesame2.sh
@@ -43,40 +43,41 @@ fi
 setup_bsbmtools
 setup_tdb
 setup_fuseki
-setup_joseki
-setup_sesame2
-if [[ -n $BIGOWLIM_HOME ]] ; then
-    setup_bigowlim
-fi
+#setup_joseki
+#setup_sesame2
+#if [[ -n $BIGOWLIM_HOME ]] ; then
+#    setup_bigowlim
+#fi
 
 
-BSBM_SCALE_FACTOR_VALUES=( 1001 2002 )
-BSBM_CONCURRENT_CLIENTS_VALUES=( 1 ) 
+BSBM_SCALE_FACTOR_VALUES=( 1000 10000 100000 )
+BSBM_CONCURRENT_CLIENTS_VALUES=( 1 4 8 32 ) 
 
 
-run_sesame2
+#run_sesame2
 for BSBM_SCALE_FACTOR in ${BSBM_SCALE_FACTOR_VALUES[@]} 
 do
     generate_bsbmtools_dataset
     load_tdb
-    load_sesame2
-    if [[ -n $BIGOWLIM_HOME ]] ; then
-        load_bigowlim
-    fi
+#    load_sesame2
+#    if [[ -n $BIGOWLIM_HOME ]] ; then
+#        load_bigowlim
+#    fi
 done
-shutdown_sesame2
+#shutdown_sesame2
 
 
 for BSBM_SCALE_FACTOR in ${BSBM_SCALE_FACTOR_VALUES[@]} 
 do
     for BSBM_CONCURRENT_CLIENTS in ${BSBM_CONCURRENT_CLIENTS_VALUES[@]} 
     do
+        test_tdb
         test_fuseki
-        test_joseki
-        test_sesame2
-        if [[ -n $BIGOWLIM_HOME ]] ; then
-            test_bigowlim
-        fi
+#        test_joseki
+#        test_sesame2
+#        if [[ -n $BIGOWLIM_HOME ]] ; then
+#            test_bigowlim
+#        fi
     done
 done
 

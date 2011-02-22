@@ -74,14 +74,14 @@ test_fuseki() {
 #        echo "==== [skipped] Running BSBM: sut=Fuseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=update ..."
 #    fi
 
-    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-bi-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
-        run_fuseki "bi"
-        free_os_caches
-        run_bsbmtools "fuseki" $FUSEKI_SPARQL_QUERY_URL $FUSEKI_SPARQL_UPDATE_URL "bi"
-        shutdown_fuseki
-    else
-        echo "==== [skipped] Running BSBM: sut=Fuseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=bi ..."
-    fi
+#    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-bi-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
+#        run_fuseki "bi"
+#        free_os_caches
+#        run_bsbmtools "fuseki" $FUSEKI_SPARQL_QUERY_URL $FUSEKI_SPARQL_UPDATE_URL "bi"
+#        shutdown_fuseki
+#    else
+#        echo "==== [skipped] Running BSBM: sut=Fuseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=bi ..."
+#    fi
 }
 
 
