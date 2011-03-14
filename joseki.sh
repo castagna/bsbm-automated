@@ -40,7 +40,6 @@ setup_joseki() {
 run_joseki() {
     echo "== Starting Joseki ..."
     export JOSEKIROOT=$BSBM_ROOT_PATH/Joseki-3.4.3
-    export JOSEKIROOT=$BSBM_ROOT_PATH/Joseki-3.4.3
     SEARCH=\"TDB\"
     REPLACE=\"$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB\"
     sed "s/${SEARCH}/$(echo $REPLACE | sed -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" $JOSEKIROOT/joseki-config-tdb.ttl > $JOSEKIROOT/joseki-config-tdb-bsbm-$BSBM_SCALE_FACTOR.ttl
@@ -89,11 +88,5 @@ test_joseki() {
     else
         echo "==== [skipped] Running BSBM: sut=Joseki, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=bi ..."
     fi
-
-
-
-
-
-
 }
 
