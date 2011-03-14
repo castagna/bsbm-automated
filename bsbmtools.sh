@@ -24,6 +24,11 @@ setup_bsbmtools() {
         cd $BSBM_ROOT_PATH
         svn co https://bsbmtools.svn.sourceforge.net/svnroot/bsbmtools/trunk bsbmtools
         cd $BSBM_ROOT_PATH/bsbmtools
+        # Patching BSBM Tools to run TDB locally
+        cp $BSBM_ROOT_PATH/tdb/lib/*.jar $BSBM_ROOT_PATH/bsbmtools/lib 
+        cp $BSBM_ROOT_PATH/tdb/target/*.jar $BSBM_ROOT_PATH/bsbmtools/lib 
+        patch -p0 < $ROOT_PATH/bsbmtools.patch
+        # Compiling BSBM Tools
         ant jar
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     else
@@ -37,12 +42,15 @@ generate_bsbmtools_dataset() {
         echo "==== Generating dataset: scale=$BSBM_SCALE_FACTOR ..."
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
-        java -cp "lib/*" -Xmx1024M -server benchmark.generator.Generator -fc -ud -pc $BSBM_SCALE_FACTOR -s nt
+        CMD="-server -Xmx1024M benchmark.generator.Generator -fc -ud -pc $BSBM_SCALE_FACTOR -s nt"
+        echo "== java -cp \"lib/*\" $CMD"
+        java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/bsbmtools-$BSBM_SCALE_FACTOR-generator.txt
         if [ ! -d "$BSBM_ROOT_PATH/datasets" ]; then
             mkdir $BSBM_ROOT_PATH/datasets
         fi
         mkdir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR
         mv $BSBM_ROOT_PATH/bsbmtools/dataset* $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR
+        mv $BSBM_ROOT_PATH/bsbmtools/td_data $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     else
         echo "==== [skipped] Generating dataset: scale=$BSBM_SCALE_FACTOR ..."
@@ -75,7 +83,7 @@ run_bsbmtools() {
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH/bsbmtools
         RESULT_FILENAME=$BSBM_SCALE_FACTOR-$SYSTEM_UNDER_TEST-$USE_CASE-$BSBM_CONCURRENT_CLIENTS
-        CMD="-Xmx256M benchmark.testdriver.TestDriver -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
+        CMD="-server -Xmx256M benchmark.testdriver.TestDriver -idir $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/td_data -runs $BSBM_NUM_QUERY_MIXES -w $BSBM_NUM_QUERY_WARM_UP -mt $BSBM_CONCURRENT_CLIENTS -t $BSBM_QUERY_TIMEOUT -ucf $USE_CASE_FILENAME -seed $BSBM_SEED -u $SPARQL_UPDATE_URL -udataset $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset_update.nt -o $BSBM_ROOT_PATH/results/$RESULT_FILENAME.xml $SPARQL_QUERY_URL"
         echo "== java -cp \"lib/*\" $CMD"
         java -cp "lib/*" $CMD > $BSBM_ROOT_PATH/results/$RESULT_FILENAME.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"

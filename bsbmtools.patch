@@ -1,0 +1,284 @@
+Index: src/benchmark/testdriver/TestDriver.java
+===================================================================
+--- src/benchmark/testdriver/TestDriver.java	(revision 77)
++++ src/benchmark/testdriver/TestDriver.java	(working copy)
+@@ -36,6 +36,8 @@
+ import org.apache.log4j.Logger;
+ import org.apache.log4j.Level;
+ 
++import com.talis.labs.bsbm.LocalTDBConnection;
++
+ import java.io.*;
+ import java.util.StringTokenizer;
+ 
+@@ -124,9 +126,14 @@
+ 			if (doSQL)
+ 				server = new SQLConnection(sparqlEndpoint, timeout,
+ 						driverClassName);
+-			else
+-				server = new SPARQLConnection(sparqlEndpoint,
+-						sparqlUpdateEndpoint, defaultGraph, timeout);
++			else {
++				if ( sparqlEndpoint.startsWith(LocalTDBConnection.TDB_PREFIX) ) {
++					server = new LocalTDBConnection(sparqlEndpoint);
++				} else {
++					server = new SPARQLConnection(sparqlEndpoint,
++							sparqlUpdateEndpoint, defaultGraph, timeout);					
++				}
++			}
+ 		} else if (multithreading) {
+ 			// do nothing
+ 		} else {
+Index: src/benchmark/testdriver/ClientManager.java
+===================================================================
+--- src/benchmark/testdriver/ClientManager.java	(revision 77)
++++ src/benchmark/testdriver/ClientManager.java	(working copy)
+@@ -1,5 +1,9 @@
+ package benchmark.testdriver;
+ 
++import com.hp.hpl.jena.query.Dataset;
++import com.hp.hpl.jena.tdb.TDBFactory;
++import com.talis.labs.bsbm.LocalTDBConnection;
++
+ public class ClientManager {
+ 	private int activeThreadsInWarmup;
+ 	private int activeThreadsInRun;
+@@ -12,6 +16,7 @@
+ 	protected boolean[] ignoreQueries;
+ 	private ClientThread[] clients;
+ 	private TestDriver parent;
++	private static Dataset dataset = null;
+ 	
+ 	ClientManager(AbstractParameterPool pool, TestDriver parent) {
+ 		activeThreadsInWarmup = 0;
+@@ -34,10 +39,18 @@
+ 			if(parent.doSQL)
+ 				sConn = new SQLConnection(parent.sparqlEndpoint, parent.timeout, parent.driverClassName);
+ 			else {
+-				if(parent.sparqlUpdateEndpoint==null)
+-					sConn = new SPARQLConnection(parent.sparqlEndpoint, parent.defaultGraph, parent.timeout);
+-				else
+-					sConn = new SPARQLConnection(parent.sparqlEndpoint, parent.sparqlUpdateEndpoint, parent.defaultGraph, parent.timeout);
++				if ( parent.sparqlEndpoint.startsWith(LocalTDBConnection.TDB_PREFIX) ) {
++					if ( dataset == null ) {
++						String location = parent.sparqlEndpoint.substring(LocalTDBConnection.TDB_PREFIX.length()) ;
++						dataset = TDBFactory.createDataset(location) ;
++					}
++					sConn = new LocalTDBConnection(dataset);
++				} else {
++					if(parent.sparqlUpdateEndpoint==null)
++						sConn = new SPARQLConnection(parent.sparqlEndpoint, parent.defaultGraph, parent.timeout);
++					else
++						sConn = new SPARQLConnection(parent.sparqlEndpoint, parent.sparqlUpdateEndpoint, parent.defaultGraph, parent.timeout);
++				}
+ 			}
+ 				
+ 			clients[i] = new ClientThread(pool, sConn, ignoreQueries.length, this, i+1);
+Index: src/com/talis/labs/bsbm/LocalTDBConnection.java
+===================================================================
+--- src/com/talis/labs/bsbm/LocalTDBConnection.java	(revision 0)
++++ src/com/talis/labs/bsbm/LocalTDBConnection.java	(revision 0)
+@@ -0,0 +1,202 @@
++/*
++ * Copyright © 2011 Talis Systems Ltd.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.talis.labs.bsbm;
++
++import org.apache.log4j.Level;
++import org.apache.log4j.Logger;
++import org.openjena.atlas.lib.NotImplemented;
++import org.xml.sax.Attributes;
++import org.xml.sax.SAXException;
++import org.xml.sax.helpers.DefaultHandler;
++
++import benchmark.qualification.QueryResult;
++import benchmark.testdriver.CompiledQuery;
++import benchmark.testdriver.CompiledQueryMix;
++import benchmark.testdriver.Query;
++import benchmark.testdriver.QueryMix;
++import benchmark.testdriver.ServerConnection;
++
++import com.hp.hpl.jena.query.Dataset;
++import com.hp.hpl.jena.query.QueryExecution;
++import com.hp.hpl.jena.query.QueryExecutionFactory;
++import com.hp.hpl.jena.query.QueryFactory;
++import com.hp.hpl.jena.query.ResultSetFormatter;
++import com.hp.hpl.jena.sparql.util.Timer;
++import com.hp.hpl.jena.tdb.TDBFactory;
++
++public class LocalTDBConnection implements ServerConnection {
++
++	public static final String TDB_PREFIX = "tdb://";
++    private static Logger logger = Logger.getLogger( LocalTDBConnection.class );
++    private Dataset dataset ;
++	
++	public LocalTDBConnection(String sparqlEndpoint) {
++		String location = sparqlEndpoint.substring(TDB_PREFIX.length()) ;
++		this.dataset = TDBFactory.createDataset(location) ;
++	}
++
++	public LocalTDBConnection(Dataset dataset) {
++		this.dataset = dataset;
++	}
++	
++	@Override
++	public void executeQuery(Query query, byte queryType) {
++		executeQuery(query.getQueryString(), queryType, query.getNr(), query.getQueryMix());
++	}
++	
++	@Override
++	public QueryResult executeValidation(Query query, byte queryType) {
++		throw new NotImplemented();
++	}
++
++	
++	@Override
++	public void executeQuery(CompiledQuery query, CompiledQueryMix queryMix) {
++		executeQuery(query.getQueryString(), query.getQueryType(), query.getNr(), queryMix);
++	}
++
++	@Override
++	public void close() {
++	}
++
++    private void executeQuery(String queryString, byte queryType, int queryNr, QueryMix queryMix) {
++        double timeInSeconds = 0.0 ;
++        int queryMixRun = queryMix.getRun() + 1;
++
++        int resultCount = 0;
++        Timer timer = new Timer() ;
++        timer.startTimer() ;
++        try {
++            resultCount = executeQuery1(queryString, dataset) ;
++        } catch (Throwable th) {
++            System.err.println("Throwable: "+th.getMessage()) ;
++            long timeMilli = timer.readTimer() ;
++            System.out.println("Query " + queryNr + ": " + (timeMilli/1000.0) + " seconds timeout!");
++            queryMix.reportTimeOut(); //inc. timeout counter
++            queryMix.setCurrent(0, 1.0*timeMilli);
++
++        }
++        long timeMilli = timer.endTimer() ;
++        timeInSeconds = timeMilli/1000.0 ; // qe.getExecutionTimeInSeconds();
++
++        if(logger.isEnabledFor( Level.ALL ) && queryMixRun > 0)
++            logResultInfo(queryNr, queryMixRun, timeInSeconds, queryString, queryType, resultCount);
++        queryMix.setCurrent(resultCount, timeInSeconds);
++    }
++
++    private void executeQuery(String queryString, byte queryType, int queryNr, CompiledQueryMix queryMix) {
++        double timeInSeconds = 0.0 ;
++        int queryMixRun = queryMix.getRun() + 1;
++
++        int resultCount = 0;
++        Timer timer = new Timer() ;
++        timer.startTimer() ;
++        try {
++            resultCount = executeQuery1(queryString, dataset) ;
++        } catch (Throwable th) {
++            System.err.println("Throwable: "+th.getMessage()) ;
++            long timeMilli = timer.readTimer() ;
++            System.out.println("Query " + queryNr + ": " + (timeMilli/1000.0) + " seconds timeout!");
++            queryMix.reportTimeOut(); //inc. timeout counter
++            queryMix.setCurrent(0, 1.0*timeMilli);
++
++        }
++        long timeMilli = timer.endTimer() ;
++        timeInSeconds = timeMilli/1000.0 ; // qe.getExecutionTimeInSeconds();
++
++        if(logger.isEnabledFor( Level.ALL ) && queryMixRun > 0)
++            logResultInfo(queryNr, queryMixRun, timeInSeconds, queryString, queryType, resultCount);
++        queryMix.setCurrent(resultCount, timeInSeconds);
++    }
++    
++    private static int executeQuery1(String queryString, Dataset dataset) {
++        com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString) ;
++        QueryExecution queryExecution = QueryExecutionFactory.create(query, dataset) ;
++        if ( query.isSelectType() )
++            return doSelectQuery(query, queryExecution) ;
++        if ( query.isDescribeType() )
++            doDescribeQuery(query, queryExecution) ;
++        else if ( query.isConstructType() )
++            doConstructQuery(query, queryExecution) ;
++//        else if ( query.isAskType() )
++//            doAskQuery(query, queryExecution) ;
++        else
++            System.err.println("Unsupported query type: "+query.getQueryType()) ;
++        queryExecution.close() ;
++        return -1 ;
++    }
++    
++    private static int doSelectQuery(com.hp.hpl.jena.query.Query query, QueryExecution queryExecution) {
++        try {
++            return ResultSetFormatter.consume(queryExecution.execSelect()) ;
++        } finally { queryExecution.close(); }
++    }
++
++    private static void doConstructQuery(com.hp.hpl.jena.query.Query query, QueryExecution queryExecution) {
++        try {
++            queryExecution.execConstruct() ;
++        } finally { queryExecution.close(); }
++    }
++
++    private static void doDescribeQuery(com.hp.hpl.jena.query.Query query, QueryExecution queryExecution) {
++        try {
++            queryExecution.execDescribe() ;
++        } finally { queryExecution.close(); }
++    }
++
++    private void logResultInfo(int queryNr, int queryMixRun, double timeInSeconds, String queryString, byte queryType, int resultCount) {
++        StringBuffer sb = new StringBuffer(1000);
++        sb.append("\n\n\tQuery " + queryNr + " of run " + queryMixRun + " has been executed ");
++        sb.append("in " + String.format("%.6f",timeInSeconds) + " seconds.\n" );
++        sb.append("\n\tQuery string:\n\n");
++        sb.append(queryString);
++        sb.append("\n\n");
++    
++        //Log results
++        if(queryType==Query.DESCRIBE_TYPE)
++            sb.append("\tQuery(Describe) result (" + resultCount + " Bytes): \n\n");
++        else if(queryType==Query.CONSTRUCT_TYPE)
++            sb.append("\tQuery(Construct) result (" + resultCount + " Bytes): \n\n");
++        else
++            sb.append("\tQuery results (" + resultCount + " results): \n\n");
++        
++
++        sb.append("\n__________________________________________________________________________________\n");
++        logger.log(Level.ALL, sb.toString());
++    }
++    
++    class ResultHandler extends DefaultHandler {
++        private int count;
++        
++        ResultHandler() {
++            count = 0;
++        }
++        
++        @Override
++        public void startElement( String namespaceURI, String localName, String qName, Attributes attrs ) throws SAXException {
++        	if(qName.equals("result"))
++        		count++;
++        }
++        
++        public int getCount() {
++            return count;
++        }
++    }
++    
++}
++
++
+

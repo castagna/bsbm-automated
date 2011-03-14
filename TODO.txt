@@ -7,11 +7,13 @@ TODO
     - ...
  - Add disk size of indexes to the results directory
  - Add the ability to run the test for a set of dataset sizes [done]
- - How to generate HTML pages as reports?
+ - How to generate HTML pages as reports? --> report.py
  - -o option for results in XML format [done]
  - Gzip dataset.nt?
  - See: https://github.com/afs/BSBM-run/blob/master/settings.txt
+ - See: http://stackoverflow.com/questions/2220301/how-to-evaluate-http-response-codes-from-bash-shell-script
  - Add the ability to checkout a specific tag or revision
  - Add SDB with MySQL|PostgreSQL
+ - Use response=$(curl --write-out %{http_code} --silent --output /dev/null servername) to check a server is running
  - ...
 

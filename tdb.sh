@@ -19,7 +19,6 @@
 
 TDB_LOADER=tdbloader
 
-
 load_tdb() {
     if [ ! -d "$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR" ]; then
         echo "==== Loading data in TDB: scale=$BSBM_SCALE_FACTOR ..."
@@ -33,6 +32,8 @@ load_tdb() {
         fi
         $TDB_LOADER -v --loc=$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB $BSBM_ROOT_PATH/datasets/bsbm-dataset-$BSBM_SCALE_FACTOR/dataset.nt > $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-tdbload.txt
         tdbstats --loc $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB > $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB/stats.opt
+        ls -la $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB > $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-size.txt
+        du -sh $BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB >> $BSBM_ROOT_PATH/results/tdb-$BSBM_SCALE_FACTOR-size.txt
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
     else
         echo "==== [skipped] Loading data in TDB: scale=$BSBM_SCALE_FACTOR ..."
@@ -52,4 +53,32 @@ setup_tdb() {
     else
         echo "==== [skipped] Checking-out and compiling TDB source code ..."
     fi
+}
+
+
+test_tdb() {
+
+    TDB_SPARQL_QUERY_URL="tdb://$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB"
+    TDB_SPARQL_UPDATE_URL="tdb://$BSBM_ROOT_PATH/datasets/tdb-$BSBM_SCALE_FACTOR/TDB"
+
+    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-tdb-explore-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
+        free_os_caches
+        run_bsbmtools "tdb" $TDB_SPARQL_QUERY_URL $TDB_SPARQL_UPDATE_URL "explore"
+    else
+        echo "==== [skipped] Running BSBM: sut=TDB, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=explore ..."
+    fi
+
+#    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-update-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
+#        free_os_caches
+#        run_bsbmtools "tdb" $TDB_SPARQL_QUERY_URL $TDB_SPARQL_UPDATE_URL "update"
+#    else
+#        echo "==== [skipped] Running BSBM: sut=TDB, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=update ..."
+#    fi
+
+#    if [ ! -f "$BSBM_ROOT_PATH/results/$BSBM_SCALE_FACTOR-fuseki-bi-$BSBM_CONCURRENT_CLIENTS.txt" ]; then
+#        free_os_caches
+#        run_bsbmtools "tdb" $TDB_SPARQL_QUERY_URL $TDB_SPARQL_UPDATE_URL "bi"
+#    else
+#        echo "==== [skipped] Running BSBM: sut=TDB, scale=$BSBM_SCALE_FACTOR, clients=$BSBM_CONCURRENT_CLIENTS, usecase=bi ..."
+#    fi
 }
