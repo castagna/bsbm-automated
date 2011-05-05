@@ -27,7 +27,8 @@ setup_bsbmtools() {
         # Patching BSBM Tools to run TDB locally
         cp $BSBM_ROOT_PATH/tdb/lib/*.jar $BSBM_ROOT_PATH/bsbmtools/lib 
         cp $BSBM_ROOT_PATH/tdb/target/*.jar $BSBM_ROOT_PATH/bsbmtools/lib 
-        patch -p0 < $ROOT_PATH/bsbmtools.patch
+        patch -p0 < $ROOT_PATH/bsbmtools-tdb.patch
+        patch -p0 < $ROOT_PATH/bsbmtools-mrsw.patch
         # Compiling BSBM Tools
         ant jar
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
