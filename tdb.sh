@@ -46,7 +46,8 @@ setup_tdb() {
         echo "==== Checking-out and compiling TDB source code ..."
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH
-        svn co https://jena.svn.sourceforge.net/svnroot/jena/TDB/trunk/ tdb
+        svn co https://svn.apache.org/repos/asf/incubator/jena/Jena2/TDB/trunk tdb
+#        svn co https://svn.apache.org/repos/asf/incubator/jena/Jena2/TDB/tags/TDB-0.8.9/ tdb
         cd $BSBM_ROOT_PATH/tdb
         mvn package
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"

@@ -43,7 +43,7 @@ fi
 
 setup_tdb # TDB must be before BSBM Tools (since we patch it to run local TDB tests)
 setup_bsbmtools
-setup_fuseki
+#setup_fuseki
 #setup_joseki
 #setup_sesame2
 #if [[ -n $BIGOWLIM_HOME ]] ; then
@@ -51,8 +51,8 @@ setup_fuseki
 #fi
 
 
-BSBM_SCALE_FACTOR_VALUES=( 10000 )
-BSBM_CONCURRENT_CLIENTS_VALUES=( 4 ) 
+BSBM_SCALE_FACTOR_VALUES=( 10000 20000 )
+BSBM_CONCURRENT_CLIENTS_VALUES=( 1 2 ) 
 
 
 #run_sesame2
@@ -73,7 +73,7 @@ do
     for BSBM_CONCURRENT_CLIENTS in ${BSBM_CONCURRENT_CLIENTS_VALUES[@]} 
     do
         test_tdb
-        test_fuseki
+#        test_fuseki
 #        test_joseki
 #        test_sesame2
 #        if [[ -n $BIGOWLIM_HOME ]] ; then
