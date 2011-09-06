@@ -26,7 +26,7 @@ setup_sdb() {
         echo "==== Checking-out and compiling SDB source code ..."
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH
-        svn co https://jena.svn.sourceforge.net/svnroot/jena/SDB/trunk/ sdb
+        svn co https://svn.apache.org/repos/asf/incubator/jena/Jena2/SDB/trunk sdb
         cd $BSBM_ROOT_PATH/sdb
         mvn package
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"

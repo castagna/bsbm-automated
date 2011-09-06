@@ -26,7 +26,7 @@ setup_fuseki() {
         echo "==== Checking-out and compiling Fuseki source code ..."
         echo "== Start: $(date +"%Y-%m-%d %H:%M:%S")"
         cd $BSBM_ROOT_PATH
-        svn co http://jena.svn.sourceforge.net/svnroot/jena/Fuseki/trunk fuseki
+        svn co https://svn.apache.org/repos/asf/incubator/jena/Jena2/Fuseki/trunk fuseki
         cd $BSBM_ROOT_PATH/fuseki
         mvn package
         echo "== Finish: $(date +"%Y-%m-%d %H:%M:%S")"
